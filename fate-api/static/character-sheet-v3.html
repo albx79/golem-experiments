@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FATE Character Sheet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .skill {
+            text-align: center;
+        }
+        .editable {
+            display: none;
+        }
+        .editable.editing {
+            display: inline;
+        }
+        .visible-on-edit {
+            display: none;
+        }
+        .visible-on-edit.editing {
+            display: table-cell;
+        }
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.5.2/dist/cdn.min.js" defer></script>
+</head>
+<body>
+<div class="container" x-data="{ editable: false, character: {
+            name: 'John Doe',
+            high_concept: 'Brave Adventurer',
+            trouble: 'Afraid of the dark',
+            aspects: ['Clever', 'Resourceful', 'Quick Thinker'],
+            skills: [
+                { rating: 4, skills: ['Contacts'] },
+                { rating: 3, skills: ['Deceive', 'Provoke', 'Rapport'] },
+                { rating: 2, skills: ['Physique', 'Will', 'Burglary'] },
+                { rating: 1, skills: ['Athletics', 'Combat', 'Empathy', 'Notice'] }
+            ],
+            stunts: [
+                'Combat Expertise: Gain +2 to attack rolls when using a sword.',
+                'Athletic Sprint: Once per scene, you may move two zones for free instead of one.',
+                'Smooth Talker: Once per session, reroll any failed Deceive or Rapport check.',
+            ],
+            skill_list: [
+                'Athletics', 'Burglary', 'Contacts', 'Crafts', 'Deceive', 'Drive', 'Empathy', 'Fight', 'Investigate',
+                'Lore', 'Notice', 'Physique', 'Provoke', 'Rapport', 'Shoot', 'Stealth', 'Will'
+            ]
+        } }">
+    <h1>FATE Character Sheet</h1>
+    <button @click="editable = !editable">Toggle Edit</button>
+    <form action="/submit_character" method="post" @submit.prevent="submitCharacter">
+        <table>
+            <thead>
+            <tr>
+                <th colspan="2">Character Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Name:</td>
+                <td>
+                    <span x-show="!editable" x-text="character.name"></span>
+                    <input x-show="editable" type="text" name="name" x-model="character.name" />
+                </td>
+            </tr>
+            <tr>
+                <td>High Concept:</td>
+                <td>
+                    <span x-show="!editable" x-text="character.high_concept"></span>
+                    <input x-show="editable" type="text" name="high_concept" x-model="character.high_concept" />
+                </td>
+            </tr>
+            <tr>
+                <td>Trouble:</td>
+                <td>
+                    <span x-show="!editable" x-text="character.trouble"></span>
+                    <input x-show="editable" type="text" name="trouble" x-model="character.trouble" />
+                </td>
+            </tr>
+            <tr>
+                <td>Aspects:</td>
+                <td>
+                    <ul>
+                        <template x-for="(aspect, index) in character.aspects" :key="index">
+                            <li>
+                                <span x-show="!editable" x-text="aspect"></span>
+                                <textarea x-show="editable" :name="'aspects[' + index + ']'" x-model="character.aspects[index]"></textarea>
+                            </li>
+                        </template>
+                    </ul>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>Skills</th>
+                <th>Rating</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="(skillGroup, groupIndex) in character.skills" :key="groupIndex">
+                <template x-for="(skill, skillIndex) in skillGroup.skills" :key="skillIndex">
+                    <tr>
+                        <td class="skill">
+                            <span x-show="!editable" x-text="skill"></span>
+                            <select x-show="editable" :name="'skills[' + groupIndex + '][skills][' + skillIndex + ']'" x-model="skillGroup.skills[skillIndex]">
+                                <template x-for="skill_option in character.skill_list" :key="skill_option">
+                                    <option x-text="skill_option" :value="skill_option" :selected="skill_option == skill"></option>
+                                </template>
+                            </select>
+                        </td>
+                        <td>
+                            <span x-show="!editable" x-text="skillGroup.rating"></span>
+                            <input x-show="editable" type="number" :name="'skills[' + groupIndex + '][rating]'" x-model="skillGroup.rating" />
+                        </td>
+                    </tr>
+                </template>
+            </template>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>Stunts</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="(stunt, index) in character.stunts" :key="index">
+                <tr>
+                    <td>
+                        <span x-show="!editable" x-text="stunt"></span>
+                        <textarea x-show="editable" :name="'stunts[' + index + ']'" x-model="character.stunts[index]"></textarea>
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+        </table>
+        <button type="submit">Save</button>
+    </form>
+</div>
+
+<script>
+    function submitCharacter() {
+        const form = document.querySelector('form');
+        const data = new FormData(form);
+        fetch('/submit_character', {
+            method: 'POST',
+            body: data
+        }).then(response => {
+            if (response.ok) {
+                alert('Character saved successfully!');
+            } else {
+                alert('Failed to save character.');
+            }
+        });
+    }
+</script>
+</body>
+</html>

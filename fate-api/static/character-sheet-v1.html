@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FATE Character Sheet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .skill {
+            text-align: center;
+        }
+        .editable {
+            display: none;
+        }
+        .editable.editing {
+            display: inline;
+        }
+        .visible-on-edit {
+            display: none;
+        }
+        .visible-on-edit.editing {
+            display: table-cell;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.5.2/dist/cdn.min.js" defer></script>
+</head>
+<body>
+<div class="container" x-data="{ editable: false, character: {
+            name: 'John Doe',
+            high_concept: 'Brave Adventurer',
+            trouble: 'Afraid of the dark',
+            aspects: ['Clever', 'Resourceful', 'Quick Thinker'],
+            skills: [
+                { name: 'Contacts', rating: 4 },
+                { name: 'Deceive', rating: 3 },
+                { name: 'Provoke', rating: 3 },
+                { name: 'Rapport', rating: 3 },
+                { name: 'Physique', rating: 2 },
+                { name: 'Will', rating: 2 },
+                { name: 'Burglary', rating: 2 },
+                { name: 'Athletics', rating: 1 },
+                { name: 'Combat', rating: 1 },
+                { name: 'Empathy', rating: 1 },
+                { name: 'Notice', rating: 1 },
+            ],
+            stunts: [
+                'Combat Expertise: Gain +2 to attack rolls when using a sword.',
+                'Athletic Sprint: Once per scene, you may move two zones for free instead of one.',
+                'Smooth Talker: Once per session, reroll any failed Deceive or Rapport check.',
+            ],
+        } }">
+    <h1>FATE Character Sheet</h1>
+    <button @click="editable = !editable">Toggle Edit</button>
+    <form action="/submit_character" method="post" @submit.prevent="submitCharacter">
+        <table>
+            <thead>
+            <tr>
+                <th colspan="2">Character Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Name:</td>
+                <td>
+                    <span x-show="!editable" x-text="character.name"></span>
+                    <input x-show="editable" type="text" name="name" x-model="character.name" />
+                </td>
+            </tr>
+            <tr>
+                <td>High Concept:</td>
+                <td>
+                    <span x-show="!editable" x-text="character.high_concept"></span>
+                    <input x-show="editable" type="text" name="high_concept" x-model="character.high_concept" />
+                </td>
+            </tr>
+            <tr>
+                <td>Trouble:</td>
+                <td>
+                    <span x-show="!editable" x-text="character.trouble"></span>
+                    <input x-show="editable" type="text" name="trouble" x-model="character.trouble" />
+                </td>
+            </tr>
+            <tr>
+                <td>Aspects:</td>
+                <td>
+                    <ul>
+                        <template x-for="(aspect, index) in character.aspects" :key="index">
+                            <li>
+                                <span x-show="!editable" x-text="aspect"></span>
+                                <input x-show="editable" type="text" :name="'aspects[' + index + ']'" x-model="character.aspects[index]" />
+                            </li>
+                        </template>
+                    </ul>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>Skills</th>
+                <th>Rating</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="(skill, index) in character.skills" :key="index">
+                <tr>
+                    <td class="skill">
+                        <span x-show="!editable" x-text="skill.name"></span>
+                        <input x-show="editable" type="text" :name="'skills[' + index + '][name]'" x-model="skill.name" />
+                    </td>
+                    <td>
+                        <span x-show="!editable" x-text="skill.rating"></span>
+                        <input x-show="editable" type="text" :name="'skills[' + index + '][rating]'" x-model="skill.rating" />
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>Stunts</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="(stunt, index) in character.stunts" :key="index">
+                <tr>
+                    <td>
+                        <span x-show="!editable" x-text="stunt"></span>
+                        <input x-show="editable" type="text" :name="'stunts[' + index + ']'" x-model="character.stunts[index]" />
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+        </table>
+        <button type="submit">Save</button>
+    </form>
+</div>
+
+<script>
+    function submitCharacter() {
+        const form = document.querySelector('form');
+        const data = new FormData(form);
+        fetch('/submit_character', {
+            method: 'POST',
+            body: data
+        }).then(response => {
+            if (response.ok) {
+                alert('Character saved successfully!');
+            } else {
+                alert('Failed to save character.');
+            }
+        });
+    }
+</script>
+</body>
+</html>

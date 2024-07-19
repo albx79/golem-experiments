@@ -1,0 +1,17 @@
+{
+  "id": "fate-api-v1",
+  "draft": true,
+  "version": "0.0.5",
+  "routes": [
+    {
+      "method": "Get",
+      "path": "/{user-id}/character",
+      "binding": {
+        "type": "wit-worker",
+        "componentId": "512351e1-1a38-424c-9736-a54f758ef5c3",
+        "workerName": "fate-character-${request.path.user-id}",
+        "response": "${ {body: golem:component/api.{get-character}(), headers: { x-test: 'foobar' } } }"
+      }
+    }
+  ]
+}

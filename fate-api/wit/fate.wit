@@ -1,0 +1,36 @@
+package golem:component;
+
+interface api {
+    record game {
+        skill-list: list<string>,
+    }
+
+    record skill-rating {
+        rating: u32,
+        skills: list<string>,
+    }
+
+    record character {
+        name: string,
+        high-concept: string,
+        trouble: string,
+        aspects: list<string>,
+        skills: list<skill-rating>,
+        stunts: list<string>,
+        skill-list: list<string>,
+    }
+
+    record character-sheet {
+        editable: bool,
+        character: character,
+    }
+
+    get-character: func() -> character;
+    update-character: func(character: character) -> ();
+    toggle-editable: func() -> bool;
+    submit-character: func(character: character) -> ();
+}
+
+world fate {
+    export api;
+}
