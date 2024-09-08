@@ -190,7 +190,11 @@
     }
 
     function fetchCharacter() {
-        fetch("http://localhost:9006/1/character")
+        fetch("http://localhost:9006/1/character", {
+            headers: {
+                "Accept": "application/json"
+            }
+        })
             .then(response => response.json())
             .catch(error => console.error('Error fetching character data:', error));
     }

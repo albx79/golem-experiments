@@ -8,9 +8,12 @@
       "path": "/{user-id}/character",
       "binding": {
         "type": "wit-worker",
-        "componentId": "512351e1-1a38-424c-9736-a54f758ef5c3",
-        "workerName": "fate-character-${request.path.user-id}",
-        "response": "${ {body: golem:component/api.{get-character}(), headers: { access-control-allow-origin: \"*\" } } }"
+        "componentId": {
+          "componentId": "043d69b7-883b-448b-b19d-c920203ba76a",
+          "version": 0
+        },
+        "workerName": "${ let user: u64 = request.path.user-id; \"fate-character-${user}\"}",
+        "response": "${ {body: golem:component/api.{get-character}(), headers: { Access-Control-Allow-Origin: \"http://localhost:9600\" } } }"
       }
     }
   ]
